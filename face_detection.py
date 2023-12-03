@@ -1,7 +1,6 @@
-import argparse
-from .vision.ssd.config.fd_config import define_img_size
-from .vision.ssd.mb_tiny_fd import create_mb_tiny_fd, create_mb_tiny_fd_predictor
-from .vision.ssd.mb_tiny_RFB_fd import create_Mb_Tiny_RFB_fd, create_Mb_Tiny_RFB_fd_predictor
+from vision.ssd.config.fd_config import define_img_size
+from vision.ssd.mb_tiny_fd import create_mb_tiny_fd, create_mb_tiny_fd_predictor
+from vision.ssd.mb_tiny_RFB_fd import create_Mb_Tiny_RFB_fd, create_Mb_Tiny_RFB_fd_predictor
 
 import os
 import sys
@@ -47,7 +46,7 @@ class FaceDetection:
     def __call__(self, images):
         assert type(images) is list
 
-        output_ctx = {'result': [], 'probs':[],'parameters': {}}
+        output_ctx = {'result': [], 'probs': [], 'parameters': {}}
         output_ctx['parameters']['obj_num'] = []
         output_ctx['parameters']['obj_size'] = []
 
@@ -68,10 +67,10 @@ class FaceDetection:
                 y_max = min(height, y_max)
 
                 faces.append([x_min, y_min, x_max, y_max])
-                size += (y_max-y_min)*(x_max-x_min)
+                size += (y_max - y_min) * (x_max - x_min)
             output_ctx['result'].append(faces)
             output_ctx['parameters']['obj_num'].append(num)
-            output_ctx['parameters']['obj_size'].append(size/num)
+            output_ctx['parameters']['obj_size'].append(size / num)
             output_ctx['probs'].append([probs[i].item() for i in range(probs.size(0))])
 
         return output_ctx

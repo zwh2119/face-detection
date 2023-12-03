@@ -1,6 +1,8 @@
 import numpy as np
+import sys
+sys.path.append('....')
 
-from ....vision.utils.box_utils import generate_priors
+from vision.utils.box_utils import generate_priors
 
 image_mean_test = image_mean = np.array([127, 127, 127])
 image_std = 128.0

@@ -1,20 +1,12 @@
 import os
-import random
 import shutil
 import time
-import contextlib
-import threading
-import asyncio
-
-import base64
 
 import cv2
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.routing import APIRoute
 from starlette.responses import JSONResponse
-from starlette.requests import Request
 from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
 
 from face_detection import FaceDetection
 
@@ -31,9 +23,11 @@ class ServiceServer:
                      ),
         ], log_level='trace', timeout=6000)
 
-        self.estimator = CarDetection({
-            'weights': 'yolov5s.pt',
-            # 'device': 'cpu'
+        self.estimator = FaceDetection({
+            'net_type': 'mb_tiny_RFB_fd',
+            'input_size': 480,
+            'threshold': 0.7,
+            'candidate_size': 1500,
             'device': 'cuda:0'
         })
 
@@ -51,6 +45,8 @@ class ServiceServer:
 
         content = []
         video_cap = cv2.VideoCapture(tmp_path)
+
+        # TODO：try to compare with batch inference
         while True:
             ret, frame = video_cap.read()
             if not ret:
@@ -60,7 +56,7 @@ class ServiceServer:
         start = time.time()
         result = await self.estimator(content)
         end = time.time()
-        print(f'process time:{end-start}s')
+        print(f'process time:{end - start}s')
         assert type(result) is dict
 
         return result

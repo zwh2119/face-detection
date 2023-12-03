@@ -4,6 +4,7 @@ from .vision.ssd.mb_tiny_fd import create_mb_tiny_fd, create_mb_tiny_fd_predicto
 from .vision.ssd.mb_tiny_RFB_fd import create_Mb_Tiny_RFB_fd, create_Mb_Tiny_RFB_fd_predictor
 
 import os
+import sys
 
 
 class FaceDetection:
@@ -43,39 +44,41 @@ class FaceDetection:
 
         os.chdir(ori_dir)
 
-    def __call__(self, input_ctx):
-        image = input_ctx['image']
-        boxes, labels, probs = self.__predictor.predict(image,
-                                                        self.__args['candidate_size'] / 2,
-                                                        self.__args['threshold'])
+    def __call__(self, images):
+        assert type(images) is list
 
-        # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        height, width, _ = image.shape
-        #for i in range(50):
-        print('[{}] len(boxes)={}'.format(__name__, len(boxes)))
-        faces = []
-        for x_min, y_min, x_max, y_max in boxes:
+        output_ctx = {'result': [], 'probs':[],'parameters': {}}
+        output_ctx['parameters']['obj_num'] = []
+        output_ctx['parameters']['obj_size'] = []
 
-            x_min = int(max(x_min, 0))
-            y_min = int(max(y_min, 0))
-            x_max = int(min(width, x_max))
-            y_max = int(min(height, y_max))
+        for image in images:
+            boxes, labels, probs = self.__predictor.predict(image,
+                                                            self.__args['candidate_size'] / 2,
+                                                            self.__args['threshold'])
 
-            #print('[{}] Face scale: {} {}'.format(__name__, x_max - x_min, y_max - y_min))
+            height, width, _ = image.shape
+            print('[{}] len(boxes)={}'.format(__name__, len(boxes)))
+            faces = []
+            size = 0
+            num = len(boxes)
+            for x_min, y_min, x_max, y_max in boxes:
+                x_min = max(x_min, 0)
+                y_min = max(y_min, 0)
+                x_max = min(width, x_max)
+                y_max = min(height, y_max)
 
-            faces.append(image[y_min:y_max, x_min:x_max])
+                faces.append([x_min, y_min, x_max, y_max])
+                size += (y_max-y_min)*(x_max-x_min)
+            output_ctx['result'].append(faces)
+            output_ctx['parameters']['obj_num'].append(num)
+            output_ctx['parameters']['obj_size'].append(size/num)
+            output_ctx['probs'].append([probs[i].item() for i in range(probs.size(0))])
 
-
-        output_ctx = {}
-
-        # output_ctx['image'] = image
-        output_ctx['faces'] = faces
-        output_ctx['bbox'] = [boxes[i, :].numpy().tolist() for i in range(boxes.size(0))]
-        output_ctx['prob'] = [probs[i].item() for i in range(probs.size(0))]
         return output_ctx
 
+
 if __name__ == '__main__':
-    args = {
+    args_ = {
         'net_type': 'mb_tiny_RFB_fd',
         'input_size': 480,
         'threshold': 0.7,
@@ -84,9 +87,10 @@ if __name__ == '__main__':
         # 'device': 'cuda:0'
     }
 
-    detector = FaceDetection(args)
+    detector = FaceDetection(args_)
 
     import cv2
+
     video_cap = cv2.VideoCapture('input/input.mp4')
 
     ret, frame = video_cap.read()
@@ -98,7 +102,3 @@ if __name__ == '__main__':
         input_ctx['image'] = frame
         detector(input_ctx)
         print('detect one frame')
-
-
-
-

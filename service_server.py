@@ -16,8 +16,7 @@ from starlette.requests import Request
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-from car_detection import CarDetection
-import field_codec_utils
+from face_detection import FaceDetection
 
 
 class ServiceServer:

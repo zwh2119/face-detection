@@ -43,7 +43,7 @@ class FaceDetection:
 
         os.chdir(ori_dir)
 
-    def __call__(self, images):
+    async def __call__(self, images):
         assert type(images) is list
 
         output_ctx = {'result': [], 'probs': [], 'parameters': {}}
@@ -56,21 +56,21 @@ class FaceDetection:
                                                             self.__args['threshold'])
 
             height, width, _ = image.shape
-            print('[{}] len(boxes)={}'.format(__name__, len(boxes)))
+            # print('[{}] len(boxes)={}'.format(__name__, len(boxes)))
             faces = []
             size = 0
             num = len(boxes)
             for x_min, y_min, x_max, y_max in boxes:
-                x_min = max(x_min, 0)
-                y_min = max(y_min, 0)
-                x_max = min(width, x_max)
-                y_max = min(height, y_max)
+                x_min = int(max(x_min, 0))
+                y_min = int(max(y_min, 0))
+                x_max = int(min(width, x_max))
+                y_max = int(min(height, y_max))
 
                 faces.append([x_min, y_min, x_max, y_max])
                 size += (y_max - y_min) * (x_max - x_min)
             output_ctx['result'].append(faces)
             output_ctx['parameters']['obj_num'].append(num)
-            output_ctx['parameters']['obj_size'].append(size / num)
+            output_ctx['parameters']['obj_size'].append(size / num if num!=0 else 0)
             output_ctx['probs'].append([probs[i].item() for i in range(probs.size(0))])
 
         return output_ctx

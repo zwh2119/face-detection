@@ -27,17 +27,17 @@ class Predictor:
         self.timer = Timer()
 
     def predict(self, image, top_k=-1, prob_threshold=None):
-        print('[{}] begin predicting...'.format(__name__))
+        # print('[{}] begin predicting...'.format(__name__))
         cpu_device = torch.device('cpu')
         height, width, _ = image.shape
         image = self.transform(image)
         images = image.unsqueeze(0)
         images = images.to(self.device)
-        print('[{}] begin torch.no_grad()...'.format(__name__))
+        # print('[{}] begin torch.no_grad()...'.format(__name__))
         with torch.no_grad():
             self.timer.start()
             scores, boxes = self.net.forward(images)
-            print('[{}] Inference time: {}'.format(__name__, self.timer.end()))
+            # print('[{}] Inference time: {}'.format(__name__, self.timer.end()))
 
         self.timer.start()
         boxes = boxes[0]
@@ -72,5 +72,5 @@ class Predictor:
         picked_box_probs[:, 1] *= height
         picked_box_probs[:, 2] *= width
         picked_box_probs[:, 3] *= height
-        print('[{}] Postprocess time: {}'.format(__name__, self.timer.end()))
+        # print('[{}] Postprocess time: {}'.format(__name__, self.timer.end()))
         return picked_box_probs[:, :4], torch.tensor(picked_labels), picked_box_probs[:, 4]

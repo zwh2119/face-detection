@@ -10,6 +10,9 @@ class FaceDetection:
 
     def __init__(self, args):
 
+        self.preload_image_path = 'preload.jpg'
+        self.preload_cycle = 10
+
         # must put define_img_size() before 'import create_mb_tiny_fd, create_mb_tiny_fd_predictor'
         ori_dir = os.getcwd()
         os.chdir(os.path.dirname(__file__) or '.')
@@ -74,6 +77,13 @@ class FaceDetection:
             output_ctx['probs'].append([probs[i].item() for i in range(probs.size(0))])
 
         return output_ctx
+
+    def preload(self):
+        input_image = cv2.imread(self.preload_image_path)
+        for i in range(self.preload_cycle):
+            self.__predictor.predict(input_image,
+                                     self.__args['candidate_size'] / 2,
+                                     self.__args['threshold'])
 
 
 if __name__ == '__main__':

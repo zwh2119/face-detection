@@ -46,13 +46,16 @@ class ServiceServer:
         content = []
         video_cap = cv2.VideoCapture(tmp_path)
 
-        # TODO：try to compare with batch inference
+        start = time.time()
         while True:
             ret, frame = video_cap.read()
             if not ret:
                 break
             content.append(frame)
         os.remove(tmp_path)
+        end = time.time()
+        print(f'decode time:{end-start}s')
+
         start = time.time()
         result = await self.estimator(content)
         end = time.time()

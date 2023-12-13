@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from face_detection import FaceDetection
 
+from log import LOGGER
 
 class ServiceServer:
 
@@ -54,12 +55,12 @@ class ServiceServer:
             content.append(frame)
         os.remove(tmp_path)
         end = time.time()
-        print(f'decode time:{end-start}s')
+        LOGGER.debug(f'decode time:{end-start}s')
 
         start = time.time()
         result = await self.estimator(content)
         end = time.time()
-        print(f'process time:{end - start}s')
+        LOGGER.debug(f'process time:{end - start}s')
         assert type(result) is dict
 
         return result
